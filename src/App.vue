@@ -1,14 +1,14 @@
 <template>
+  <router-view />
   <div @click="handleNav" class="icon"><i class="fas fa-bars"></i></div>
-  <div class="bg" :class="{ close: nav }"></div>
-  <div class="bg green" :class="{ close: nav }"></div>
-  <div id="nav" :class="{ close: nav }">
-    <router-link to="/" class="link">Home</router-link>
-    <router-link :to="'/' + r" v-for="r in route" :key="r" class="link"
+  <div class="bg" :class="{ close: !nav }"></div>
+  <div class="bg green" :class="{ close: !nav }"></div>
+  <div id="nav" :class="{ close: !nav }">
+    <router-link to="/" class="link" @click="closeNav">Home</router-link>
+    <router-link :to="'/' + r" v-for="r in route" :key="r" class="link" @click="closeNav"
       >{{ ToName(r) }}
     </router-link>
   </div>
-  <router-view />
 </template>
 
 <script lang="ts">
@@ -31,14 +31,19 @@ export default defineComponent({
         .reduce((newName, ele) => `${newName} ${ele}`);
     },
     handleNav() {
-      console.log(this.nav);
       this.nav = !this.nav;
+    },
+    closeNav() {
+      this.nav = true;
     },
   },
 });
 </script>>
 
 <style lang="scss">
+* {
+  box-sizing: border-box;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -51,11 +56,12 @@ export default defineComponent({
   padding: 20px;
   position: fixed;
   text-align: left;
-  width: 100px;
+  width: 150px;
   height: 100vh;
   background-color: white;
   transition: 0.3s ease-out;
   transition-delay: 0.6s;
+  top: 0;
   &.close {
     transition-delay: 0s;
   }
@@ -70,7 +76,7 @@ export default defineComponent({
   }
 }
 .bg {
-  width: 200px;
+  width: 210px;
   height: 100vh;
   background-color: #2c3e50;
   position: absolute;
@@ -83,7 +89,7 @@ export default defineComponent({
 }
 .green {
   background-color: #42b983;
-  width: 170px;
+  width: 180px;
   transition: 0.3s ease-out;
   transition-delay: 0.3s;
   &.close {
@@ -109,11 +115,32 @@ export default defineComponent({
   z-index: 10;
   font-size: 22px;
   padding: 20px;
+  top: 0;
 }
 .fa-bars {
   cursor: pointer;
   &:hover {
     transform: scale(1.2);
+  }
+}
+@media screen and (max-width: 900px) {
+  .bg {
+    width: 100vw;
+  }
+  .green {
+    width: 90vw;
+  }
+  #nav {
+    width: 80vw;
+  }
+  .icon {
+    font-size: 2rem;
+  }
+  .link {
+    padding: 15px;
+    top: 70px;
+    font-size: 30px;
+    text-align: center;
   }
 }
 </style>

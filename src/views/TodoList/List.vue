@@ -20,13 +20,13 @@ export default defineComponent({
       type: Object as PropType<Task>,
       required: true,
     },
-    del: {
-      type: Function as PropType<(id: number) => void>,
-      required: true,
+  },
+  methods: {
+    del(id: number) {
+      this.$emit('del', id);
     },
-    finish: {
-      type: Function as PropType<(id: number) => void>,
-      required: true,
+    finish(id: number) {
+      this.$emit('finish', id);
     },
   },
 });

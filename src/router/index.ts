@@ -1,7 +1,12 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import Home from '../views/Home.vue';
 
-export const routePath: string[] = ['todo-list'];
+export const routePath: string[] = [
+  'todo-list',
+  'password-generator',
+  'drink-water',
+  'dnd-note-app',
+];
 
 const ToRouteName = (path: string) =>
   path

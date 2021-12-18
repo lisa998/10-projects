@@ -1,10 +1,10 @@
 <template>
   <body>
+    <h1>todos</h1>
     <div id="form">
-      <h1>todos</h1>
-      <input v-model="task" @keypress="submit" placeholder="Enter your todo" />
+      <input v-model="task" @keypress.enter="submit" placeholder="Enter your todo" />
       <ul class="todos">
-        <list :del="del" :finish="finish" v-for="(t, id) in tasklist" :t="t" :key="id"></list>
+        <list @del="del" @finish="finish" v-for="(t, id) in tasklist" :t="t" :key="id"></list>
       </ul>
     </div>
 
@@ -36,8 +36,8 @@ export default defineComponent({
     };
   },
   methods: {
-    submit(e: KeyboardEvent) {
-      if (this.task && e.key === 'Enter') {
+    submit() {
+      if (this.task) {
         this.tasklist.push({ name: this.task, id: this.id, finished: false });
         this.id += 1;
         this.task = '';
@@ -89,13 +89,13 @@ body {
 }
 
 h1 {
-  color: rgb(179, 131, 226);
+  color: #42b983;
   font-size: 10rem;
   text-align: center;
   opacity: 0.4;
 }
 
-form {
+#form {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   max-width: 100%;
   width: 400px;
@@ -112,7 +112,7 @@ input {
     color: #d5d5d5;
   }
   &:focus {
-    outline-color: rgb(179, 131, 226);
+    outline-color: #42b983;
   }
 }
 
@@ -127,5 +127,16 @@ small {
   color: #b5b5b5;
   margin-top: 3rem;
   text-align: center;
+}
+@media screen and (max-width: 900px) {
+  h1 {
+    font-size: 5rem;
+  }
+  #form {
+    max-width: 95%;
+  }
+  input {
+    font-size: 1.5rem;
+  }
 }
 </style>
