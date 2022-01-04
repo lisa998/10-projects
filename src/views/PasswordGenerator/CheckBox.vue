@@ -18,7 +18,7 @@ export default defineComponent({
   name: 'CheckBox',
   props: {
     settings: {
-      type: [] as PropType<Setting>,
+      type: Array as PropType<Setting[]>,
       required: true,
     },
   },

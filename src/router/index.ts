@@ -6,6 +6,10 @@ export const routePath: string[] = [
   'password-generator',
   'drink-water',
   'dnd-note-app',
+  'poke-dex',
+  'slider',
+  'weather-app',
+  'recipe-app',
 ];
 
 const ToRouteName = (path: string) =>

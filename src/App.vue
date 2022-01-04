@@ -1,14 +1,16 @@
 <template>
   <router-view />
-  <div @click="handleNav" class="icon"><i class="fas fa-bars"></i></div>
-  <div class="bg" :class="{ close: !nav }"></div>
-  <div class="bg green" :class="{ close: !nav }"></div>
-  <div id="nav" :class="{ close: !nav }">
-    <router-link to="/" class="link" @click="closeNav">Home</router-link>
-    <router-link :to="'/' + r" v-for="r in route" :key="r" class="link" @click="closeNav"
-      >{{ ToName(r) }}
-    </router-link>
+  <div class="NavBar" @wheel="(e) => e.stopPropagation()">
+    <div class="bg" :class="{ close: !nav }"></div>
+    <div class="bg green" :class="{ close: !nav }"></div>
+    <div id="nav" :class="{ close: !nav }">
+      <router-link to="/" class="link" @click="closeNav">Home</router-link>
+      <router-link :to="'/' + r" v-for="r in route" :key="r" class="link" @click="closeNav"
+        >{{ ToName(r) }}
+      </router-link>
+    </div>
   </div>
+  <div @click="handleNav" class="icon"><i class="fas fa-bars"></i></div>
 </template>
 
 <script lang="ts">
@@ -62,6 +64,11 @@ export default defineComponent({
   transition: 0.3s ease-out;
   transition-delay: 0.6s;
   top: 0;
+  overflow-y: scroll;
+  z-index: 5;
+  &::-webkit-scrollbar {
+    display: none;
+  }
   &.close {
     transition-delay: 0s;
   }
@@ -83,6 +90,8 @@ export default defineComponent({
   top: 0;
   transition: 0.3s ease-out;
   transition-delay: 0s;
+  z-index: 1;
+  position: fixed;
   &.close {
     transition-delay: 0.6s;
   }
@@ -92,6 +101,7 @@ export default defineComponent({
   width: 180px;
   transition: 0.3s ease-out;
   transition-delay: 0.3s;
+
   &.close {
     transition-delay: 0.3s;
   }
@@ -116,6 +126,7 @@ export default defineComponent({
   font-size: 22px;
   padding: 20px;
   top: 0;
+  position: fixed;
 }
 .fa-bars {
   cursor: pointer;
