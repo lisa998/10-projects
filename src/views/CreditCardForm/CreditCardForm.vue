@@ -196,6 +196,7 @@ body {
   display: flex;
   justify-content: center;
   background: #ddeefc;
+  font-family: 'Source Sans Pro', sans-serif;
 }
 .container {
   display: flex;
