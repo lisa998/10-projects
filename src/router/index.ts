@@ -11,6 +11,7 @@ export const routePath: string[] = [
   'weather-app',
   'recipe-app',
   'credit-card-form',
+  'keyboard-player',
 ];
 
 const ToRouteName = (path: string) =>

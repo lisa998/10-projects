@@ -151,6 +151,7 @@ export default defineComponent({
   font-family: 'Source Code Pro', monospace;
   transition: 0.5s ease-in;
   border-radius: 10px;
+  box-shadow: 0 25px 60px 5px rgb(90 116 148 / 70%);
   background-image: url('https://raw.githubusercontent.com/muhammederdem/credit-card-form/master/src/assets/images/17.jpeg');
   &-front,
   &-back {
@@ -162,7 +163,6 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     padding: 25px;
-    box-shadow: 0 25px 60px 5px rgb(90 116 148 / 70%);
   }
   &.back {
     transform: perspective(50em) rotate3d(0, 1, 0, 180deg);
