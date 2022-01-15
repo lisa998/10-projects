@@ -12,40 +12,41 @@
           alt="visa"
         />
       </div>
-      <div class="card-imgs-nums cursor" @click="cardNumDom.focus()">
+      <div class="card-imgs-nums cursor" @click="$emit('number-click')">
         <span v-for="(ele, i) in poundSign" :key="i" class="card-imgs-num">
           <transition name="number">
-            <div v-if="cardValue[i] && i >= 5 && i <= 13 && i !== 9">*</div>
-            <div v-else-if="cardValue[i]">{{ cardValue[i] }}</div>
+            <div v-if="value.num[i] && i >= 5 && i <= 13 && i !== 9">*</div>
+            <div v-else-if="value.num[i]">{{ value.num[i] }}</div>
             <div v-else>{{ ele }}</div>
           </transition>
         </span>
       </div>
       <div class="card-imgs-lastRow">
-        <div class="card-imgs-holder cursor" @click="cardHolderDom.focus()">
+        <div class="card-imgs-holder cursor" @click="$emit('holder-click')">
           <div class="card-imgs-title">Card Holder</div>
           <transition name="holder" mode="out-in">
-            <div v-if="!cardHolder">full name</div>
+            <div v-if="!value.holder">full name</div>
             <div v-else>
               <transition-group name="holder">
-                <div v-for="(ele, i) in cardHolder.split('').slice(0, 20)" :key="i">
+                <div v-for="(ele, i) in value.holder.split('').slice(0, 20)" :key="i">
                   {{ ele }}
                 </div>
-                <div v-if="cardHolder.split('').length > 20">...</div>
+                <div v-if="value.holder.split('').length > 20">...</div>
               </transition-group>
             </div>
           </transition>
         </div>
-        <div @click="cardExpiresDom.focus()" class="cursor">
+        <div @click="$emit('expires-click')" class="cursor">
           <div class="card-imgs-title">Expires</div>
           <div>
             <transition name="holder" mode="out-in">
-              <span v-if="mm" :key="mm">{{ mm }}</span>
+              <span v-if="value.mm" :key="value.mm">{{ value.mm }}</span>
               <span v-else :key="0">MM</span>
             </transition>
             <span>/</span>
             <transition name="holder" mode="out-in">
-              <span v-if="!yy">YY</span><span v-else :key="yy">{{ yy.slice(2, 4) }}</span>
+              <span v-if="!value.yy">YY</span
+              ><span v-else :key="value.yy">{{ value.yy.slice(2, 4) }}</span>
             </transition>
           </div>
         </div>
@@ -56,7 +57,7 @@
       <div class="card-cvv">
         <div class="card-cvv-title">CVV</div>
         <div class="card-cvv-content">
-          <span v-for="(ele, i) in cardCvv.split('')" :key="i">*</span>
+          <span v-for="(ele, i) in value.cvv.split('')" :key="i">*</span>
         </div>
       </div>
       <img
@@ -70,19 +71,25 @@
 <script lang="ts">
 /* eslint-disable object-curly-newline */
 /* eslint-disable comma-dangle */
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, onMounted } from 'vue';
 
 interface FocusClass {
   num: boolean;
   holder: boolean;
   expires: boolean;
 }
+interface Value {
+  num: string;
+  holder: string;
+  mm: string;
+  yy: string;
+  cvv: string;
+}
 export default defineComponent({
-  name: 'Home',
+  name: 'Card',
   components: {},
   props: {
     back: Boolean,
-    poundSign: Array as PropType<string[]>,
     cardValue: String,
     cardHolder: String,
     mm: String,
@@ -93,6 +100,11 @@ export default defineComponent({
     cardHolderDom: HTMLElement,
     cardExpiresDom: HTMLElement,
     focusClass: Object as PropType<FocusClass>,
+    value: Object as PropType<Value>,
+  },
+  setup() {
+    const poundSign = '#### #### #### ####'.split('');
+    return { poundSign };
   },
 });
 </script>

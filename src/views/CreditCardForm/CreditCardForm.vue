@@ -3,74 +3,43 @@
     <div class="container">
       <card
         :back="back"
-        :poundSign="poundSign"
-        :cardValue="cardValue"
-        :cardHolder="cardHolder"
-        :mm="mm"
-        :yy="yy"
-        :cardCvv="cardCvv"
         :renderRotateCard="renderRotateCard"
-        :cardNumDom="cardNumDom"
-        :cardHolderDom="cardHolderDom"
-        :cardExpiresDom="cardExpiresDom"
+        @number-click="cardNumDom.focus()"
+        @holder-click="cardHolderDom.focus()"
+        @expires-click="cardExpiresDom.focus()"
         :focusClass="focusClass"
+        :value="value"
       ></card>
       <div class="form">
-        <label>
-          Card Number
-          <input
-            maxlength="19"
-            @input="onCardNumberChange"
-            :value="cardValue"
-            ref="cardNumDom"
-            @focus="focusClass.num = true"
-            @blur="focusClass.num = false"
-          />
-        </label>
-        <label>
-          Card Holder
-          <input
-            type="text"
-            v-model="cardHolder"
-            ref="cardHolderDom"
-            @focus="focusClass.holder = true"
-            @blur="focusClass.holder = false"
-          />
-        </label>
+        <input-component
+          :label="'Card Number'"
+          v-model:Value="value.num"
+          ref="cardNumDom"
+          @focus="focusClass.num = true"
+          @blur="focusClass.num = false"
+        ></input-component>
+        <input-component
+          :label="'Card Holder'"
+          v-model:Value="value.holder"
+          ref="cardHolderDom"
+          @focus="focusClass.holder = true"
+          @blur="focusClass.holder = false"
+        ></input-component>
+
         <div class="form-row">
-          <div class="form-date">
-            <label for="expiration_date">Expiration Date </label>
-            <div class="form-date-select">
-              <select
-                v-model="mm"
-                id="expiration_date"
-                ref="cardExpiresDom"
-                @focus="focusClass.expires = true"
-                @blur="focusClass.expires = false"
-              >
-                <option value disabled selected>Month</option>
-                <option :value="month" v-for="month in months" :key="month">{{ month }}</option>
-              </select>
-              <select
-                v-model="yy"
-                @focus="focusClass.expires = true"
-                @blur="focusClass.expires = false"
-              >
-                <option value disabled selected>Year</option>
-                <option :value="year" v-for="year in years" :key="year">{{ year }}</option>
-              </select>
-            </div>
-          </div>
-          <label class="form-cvv">
-            CVV
-            <input
-              type="number"
-              :value="cardCvv"
-              @input="onCvvChange"
-              @focus="back = true"
-              @blur="back = false"
-            />
-          </label>
+          <expires
+            v-model:mm="value.mm"
+            v-model:yy="value.yy"
+            ref="cardExpiresDom"
+            @focus="focusClass.expires = true"
+            @blur="focusClass.expires = false"
+          ></expires>
+          <input-component
+            :label="'CVV'"
+            v-model:Value="value.cvv"
+            @focus="back = true"
+            @blur="back = false"
+          ></input-component>
         </div>
         <div class="form-submit">Submit</div>
       </div>
@@ -79,35 +48,26 @@
 </template>
 
 <script lang="ts">
+// ref="cardExpiresDom"
 /* eslint-disable object-curly-newline */
 /* eslint-disable comma-dangle */
-import { defineComponent, ref, computed, watch, onMounted, Ref } from 'vue';
+import { defineComponent, ref, watch, onMounted, Ref } from 'vue';
 import Card from './Card.vue';
+import Expires from './Expires.vue';
+import InputComponent from './InputComponent.vue';
 
 export default defineComponent({
   name: 'CreditCardForm',
-  components: { Card },
+  components: { Card, InputComponent, Expires },
   setup() {
-    const months: string[] = [];
-    for (let i = 1; i <= 12; i += 1) {
-      months.push(i.toString().padStart(2, '0'));
-    }
-    const years: string[] = [];
-    const nowYear = new Date().getFullYear();
-    for (let i = nowYear; i <= nowYear + 10; i += 1) {
-      years.push(i.toString());
-    }
-    const poundSign = '#### #### #### ####'.split('');
-    const mm = ref('');
-    const yy = ref('');
-    const cardHolder = ref('');
-    const cardNum = ref('');
-    const cardCvv = ref('');
     const back = ref(false);
     const renderRotateCard = ref(false);
+
     const cardNumDom: Ref<HTMLElement | undefined> = ref();
     const cardHolderDom: Ref<HTMLElement | undefined> = ref();
     const cardExpiresDom: Ref<HTMLElement | undefined> = ref();
+
+    const value = ref({ num: '', holder: '', mm: '', yy: '', cvv: '' });
     const focusClass = ref({
       num: false,
       holder: false,
@@ -121,55 +81,20 @@ export default defineComponent({
         }, 350);
       }
     );
-    const onCardNumberChange = (e: InputEvent) => {
-      if ((e.target as HTMLInputElement).value.length < 20) {
-        cardNum.value = (e.target as HTMLInputElement).value.replaceAll(' ', '');
-        cardNum.value = cardNum.value.replace(/[^\d]/g, '');
-      }
-      return false;
-    };
-    const onCvvChange = (e: InputEvent) => {
-      cardCvv.value = (e.target as HTMLInputElement).value.replaceAll(' ', '');
-      cardCvv.value = cardCvv.value.replace(/[^\d]/g, '');
-      if ((e.target as HTMLInputElement).value.length > 4) {
-        cardCvv.value = cardCvv.value.slice(0, 4);
-      }
-    };
-    const cardValue = computed(() => {
-      const num = cardNum.value;
-      let str = '';
-      for (let i = 0; i < num.length / 4; i += 1) {
-        const slice = num.slice(0 + i * 4, 4 + i * 4);
-        if (Math.floor(num.length / 4) === i || i === 3) {
-          str += slice;
-        } else {
-          str = `${str}${slice} `;
-        }
-      }
-      return str;
-    });
+
     onMounted(() => {
-      (cardNumDom.value as HTMLElement).focus();
+      // eslint-disable-next-line no-unused-expressions
+      cardNumDom.value?.focus();
     });
 
     return {
-      months,
-      years,
-      mm,
-      yy,
-      cardNum,
-      onCardNumberChange,
-      cardValue,
-      cardHolder,
-      poundSign,
-      cardCvv,
-      onCvvChange,
       back,
       renderRotateCard,
       cardNumDom,
       cardHolderDom,
       cardExpiresDom,
       focusClass,
+      value,
     };
   },
 });
