@@ -4,75 +4,84 @@
       <card
         :back="back"
         :renderRotateCard="renderRotateCard"
-        @number-click="cardNumDom.focus()"
-        @holder-click="cardHolderDom.focus()"
-        @expires-click="cardExpiresDom.focus()"
+        @number-click="formDom.focusNum()"
+        @holder-click="formDom.focusHolder()"
+        @expires-click="formDom.focusExpires()"
         :focusClass="focusClass"
         :value="value"
       ></card>
-      <div class="form">
-        <input-component
-          :label="'Card Number'"
-          v-model:Value="value.num"
-          ref="cardNumDom"
-          @focus="focusClass.num = true"
-          @blur="focusClass.num = false"
-        ></input-component>
-        <input-component
-          :label="'Card Holder'"
-          v-model:Value="value.holder"
-          ref="cardHolderDom"
-          @focus="focusClass.holder = true"
-          @blur="focusClass.holder = false"
-        ></input-component>
-
-        <div class="form-row">
-          <expires
-            v-model:mm="value.mm"
-            v-model:yy="value.yy"
-            ref="cardExpiresDom"
-            @focus="focusClass.expires = true"
-            @blur="focusClass.expires = false"
-          ></expires>
-          <input-component
-            :label="'CVV'"
-            v-model:Value="value.cvv"
-            @focus="back = true"
-            @blur="back = false"
-          ></input-component>
-        </div>
-        <div class="form-submit">Submit</div>
-      </div>
+      <form-component ref="formDom"></form-component>
     </div>
   </body>
 </template>
 
 <script lang="ts">
-// ref="cardExpiresDom"
 /* eslint-disable object-curly-newline */
 /* eslint-disable comma-dangle */
-import { defineComponent, ref, watch, onMounted, Ref } from 'vue';
+import { defineComponent, ref, watch, Ref, provide } from 'vue';
 import Card from './Card.vue';
-import Expires from './Expires.vue';
-import InputComponent from './InputComponent.vue';
+import FormComponent from './FormComponent.vue';
 
 export default defineComponent({
   name: 'CreditCardForm',
-  components: { Card, InputComponent, Expires },
+  components: { Card, FormComponent },
   setup() {
-    const back = ref(false);
     const renderRotateCard = ref(false);
+    const formDom: Ref<HTMLElement | undefined> = ref();
 
-    const cardNumDom: Ref<HTMLElement | undefined> = ref();
-    const cardHolderDom: Ref<HTMLElement | undefined> = ref();
-    const cardExpiresDom: Ref<HTMLElement | undefined> = ref();
-
+    const back = ref(false);
     const value = ref({ num: '', holder: '', mm: '', yy: '', cvv: '' });
     const focusClass = ref({
       num: false,
       holder: false,
       expires: false,
     });
+    const focusOn = {
+      'Card Number': () => {
+        focusClass.value.num = true;
+      },
+      'Card Holder': () => {
+        focusClass.value.holder = true;
+      },
+      CVV: () => {
+        back.value = true;
+      },
+      expires: () => {
+        focusClass.value.expires = true;
+      },
+    };
+    const blur = {
+      'Card Number': () => {
+        focusClass.value.num = false;
+      },
+      'Card Holder': () => {
+        focusClass.value.holder = false;
+      },
+      CVV: () => {
+        back.value = false;
+      },
+      expires: () => {
+        focusClass.value.expires = false;
+      },
+    };
+    const handleChangeValue = {
+      'Card Number': (str: string) => {
+        value.value.num = str;
+      },
+      'Card Holder': (str: string) => {
+        value.value.holder = str;
+      },
+      CVV: (str: string) => {
+        value.value.cvv = str;
+      },
+      mm: (str: string) => {
+        value.value.mm = str;
+      },
+      yy: (str: string) => {
+        value.value.yy = str;
+      },
+    };
+    // to delay rotate render
     watch(
       () => back.value,
       () => {
@@ -81,18 +90,16 @@ export default defineComponent({
         }, 350);
       }
     );
-
-    onMounted(() => {
-      // eslint-disable-next-line no-unused-expressions
-      cardNumDom.value?.focus();
-    });
+    provide('back', back);
+    provide('value', value);
+    provide('handleChangeValue', handleChangeValue);
+    provide('focusFunction', focusOn);
+    provide('blurFunction', blur);
 
     return {
       back,
       renderRotateCard,
-      cardNumDom,
-      cardHolderDom,
-      cardExpiresDom,
+      formDom,
       focusClass,
       value,
     };

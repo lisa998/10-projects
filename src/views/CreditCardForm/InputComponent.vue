@@ -6,9 +6,9 @@
       :maxlength="maxlength[label]"
       @input="handleChange[label]"
       :value="handleValue[label]"
-      ref="InputDom"
-      @focus="$emit('focus')"
-      @blur="$emit('blur')"
+      @focus="focusFunction[label]"
+      @blur="blurFunction[label]"
+      ref="inputDom"
     />
   </label>
 </template>
@@ -16,22 +16,45 @@
 <script lang="ts">
 /* eslint-disable object-curly-newline */
 /* eslint-disable no-unused-expressions */
-import { defineComponent, ref, computed } from 'vue';
+
+import { defineComponent, ref, computed, inject, onMounted, Ref } from 'vue';
 
 export default defineComponent({
   name: 'InputComponent',
   components: {},
   props: {
-    Value: String,
     label: String,
   },
-  emits: ['onCardNumberChange', 'focus', 'blur', 'update:Value'],
-  setup(props, { emit }) {
-    const InputDom = ref<HTMLInputElement | null>(null);
-    const focus = () => {
-      InputDom.value?.focus();
-    };
+  setup(props) {
+    const value:
+      | Ref<{
+          num: string;
+          holder: string;
+          mm: string;
+          yy: string;
+          cvv: string;
+        }>
+      | undefined = inject('value');
+    const handleChangeValue:
+      | {
+          'Card Number': (str: string) => void;
+          'Card Holder': (str: string) => void;
+          CVV: (str: string) => void;
+        }
+      | undefined = inject('handleChangeValue');
+    const focusFunction = inject('focusFunction');
+    const blurFunction = inject('blurFunction');
     const cardNum = ref('');
+    const cvv = ref('');
+
+    // handleNumChange
+    const onCardNumberChange = (e: InputEvent) => {
+      if ((e.target as HTMLInputElement).value.length < 20) {
+        cardNum.value = (e.target as HTMLInputElement).value.replaceAll(' ', '');
+        cardNum.value = cardNum.value.replace(/[^\d]/g, '');
+      }
+      return false;
+    };
     const cardValue = computed(() => {
       const num = cardNum.value;
       let str = '';
@@ -43,29 +66,29 @@ export default defineComponent({
           str = `${str}${slice} `;
         }
       }
-      emit('update:Value', str);
+      if (handleChangeValue) {
+        handleChangeValue['Card Number'](str);
+      }
       return str;
     });
 
-    const onCardNumberChange = (e: InputEvent) => {
-      if ((e.target as HTMLInputElement).value.length < 20) {
-        cardNum.value = (e.target as HTMLInputElement).value.replaceAll(' ', '');
-        cardNum.value = cardNum.value.replace(/[^\d]/g, '');
-      }
-      return false;
-    };
+    // handleHolderChange
     const onChange = (e: InputEvent) => {
-      emit('update:Value', (e.target as HTMLInputElement).value);
+      if (handleChangeValue) {
+        handleChangeValue['Card Holder']((e.target as HTMLInputElement).value);
+      }
     };
 
-    const cvv = ref('');
+    // handleCvvChange
     const onCvvChange = (e: InputEvent) => {
       cvv.value = (e.target as HTMLInputElement).value.replaceAll(' ', '');
       cvv.value = cvv.value.replace(/[^\d]/g, '');
       if ((e.target as HTMLInputElement).value.length > 4) {
         cvv.value = cvv.value.slice(0, 4);
       }
-      emit('update:Value', cvv.value);
+      if (handleChangeValue) {
+        handleChangeValue.CVV(cvv.value);
+      }
     };
     const handleChange = {
       'Card Number': onCardNumberChange,
@@ -74,7 +97,7 @@ export default defineComponent({
     };
     const handleValue = computed(() => ({
       'Card Number': cardValue.value,
-      'Card Holder': props.Value,
+      'Card Holder': value?.value.holder,
       CVV: cvv.value,
     }));
     const maxlength = {
@@ -83,7 +106,27 @@ export default defineComponent({
       CVV: 4,
     };
 
-    return { focus, InputDom, cardValue, handleChange, handleValue, maxlength };
+    // handleFocus
+    const inputDom: Ref<HTMLElement | undefined> = ref();
+    const toFocus = () => {
+      (inputDom.value as HTMLElement).focus();
+    };
+    onMounted(() => {
+      if (props.label === 'Card Number') {
+        toFocus();
+      }
+    });
+
+    return {
+      inputDom,
+      cardValue,
+      handleChange,
+      handleValue,
+      maxlength,
+      focusFunction,
+      blurFunction,
+      toFocus,
+    };
   },
 });
 </script>
@@ -99,46 +142,8 @@ export default defineComponent({
   transition: 0.2s ease;
 }
 .form {
-  width: 500px;
-  height: 600px;
-  border-radius: 10px;
-  padding: 200px 35px 35px;
-  box-shadow: 0 30px 60px 0 rgb(90 116 148 / 40%);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  background-color: white;
-  text-align: left;
-  font-size: 0.5em;
-  &-row {
-    display: flex;
-    margin: 10px 0px;
-    align-items: center;
-  }
-  &-date {
-    &-select {
-      display: flex;
-      & select:nth-child(2) {
-        margin-left: 20px !important;
-      }
-    }
-  }
   &-cvv {
     margin-left: 20px !important;
-  }
-  &-submit {
-    background-color: #2364d2;
-    color: white;
-    box-shadow: 0 5px 15px 0 rgb(90 116 148 / 40%);
-    width: 100%;
-    height: 50px;
-    padding: 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 15px;
-    text-align: center;
-    font-size: large;
   }
 
   & input {
@@ -156,15 +161,9 @@ export default defineComponent({
     width: 100%;
     margin: 10px 0px;
   }
-  & select {
-    padding: 5px 15px;
-    height: 50px;
-    @include inputStyle;
-  }
 }
 @media screen and (max-width: 600px) {
   .form {
-    width: 90vw;
     & select {
       width: 20vw;
     }

@@ -3,21 +3,21 @@
     <label for="expiration_date">Expiration Date </label>
     <div class="form-date-select">
       <select
-        :value="mm"
-        @change="$emit('update:mm', $event.target.value)"
+        :value="value.mm"
+        @change="handleChangeValue.mm($event.target.value)"
         id="expiration_date"
         ref="expiresDom"
-        @focus="$emit('focus')"
-        @blur="$emit('blur')"
+        @focus="focusFunction.expires"
+        @blur="blurFunction.expires"
       >
         <option value disabled selected>Month</option>
         <option :value="month" v-for="month in months" :key="month">{{ month }}</option>
       </select>
       <select
-        :value="yy"
-        @change="$emit('update:yy', $event.target.value)"
-        @focus="$emit('focus')"
-        @blur="$emit('blur')"
+        :value="value.yy"
+        @change="handleChangeValue.yy($event.target.value)"
+        @focus="focusFunction.expires"
+        @blur="blurFunction.expires"
       >
         <option value disabled selected>Year</option>
         <option :value="year" v-for="year in years" :key="year">{{ year }}</option>
@@ -28,7 +28,7 @@
 
 <script lang="ts">
 /* eslint-disable object-curly-newline */
-import { defineComponent, ref, Ref } from 'vue';
+import { defineComponent, ref, Ref, inject } from 'vue';
 
 export default defineComponent({
   name: 'Expires',
@@ -47,10 +47,23 @@ export default defineComponent({
       years.push(i.toString());
     }
     const expiresDom: Ref<HTMLElement | undefined> = ref();
-    const focus = () => {
+    const toFocus = () => {
       (expiresDom.value as HTMLElement).focus();
     };
-    return { months, years, focus, expiresDom };
+    const value = inject('value');
+    const handleChangeValue = inject('handleChangeValue');
+    const focusFunction = inject('focusFunction');
+    const blurFunction = inject('blurFunction');
+    return {
+      months,
+      years,
+      toFocus,
+      expiresDom,
+      focusFunction,
+      blurFunction,
+      value,
+      handleChangeValue,
+    };
   },
 });
 </script>
@@ -66,11 +79,6 @@ export default defineComponent({
   transition: 0.2s ease;
 }
 .form {
-  &-row {
-    display: flex;
-    margin: 10px 0px;
-    align-items: center;
-  }
   &-date {
     &-select {
       display: flex;
