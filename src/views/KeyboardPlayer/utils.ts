@@ -10,7 +10,12 @@ interface StringResponse {
 // eslint-disable-next-line import/prefer-default-export
 export async function getSentence(): Promise<StringResponse> {
   const result: AxiosResponse<StringResponse> = await axios('https://api.eatrice.top/');
-  if (result.data.Content[result.data.Content.length - 1] !== '.') {
+  // correct the sentence syntax wrong
+  if (!result.data.Content.includes(', ')) {
+    result.data.Content = result.data.Content.replaceAll(',', ', ');
+  }
+  const end = result.data.Content[result.data.Content.length - 1];
+  if (end !== '.' && end !== '?') {
     result.data.Content = `${result.data.Content}.`;
   }
   return result.data;

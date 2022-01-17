@@ -1,7 +1,10 @@
 <template>
   <body>
     <h1>Keyboard Player</h1>
-    <div class="content" v-if="!finish">
+    <div class="content" v-if="countdown">
+      {{ countdown }}
+    </div>
+    <div class="content" v-else-if="!finish">
       <div style="display: flex" class="content-sentence">
         <span
           class="content-words"
@@ -32,6 +35,7 @@
     </div>
     <div class="content end" v-else>
       <div>Finish~</div>
+      <div>Speed: {{ speed }} Words per Second</div>
       <div @click="restart">Restart</div>
     </div>
     <div style="position: relative">
@@ -52,7 +56,7 @@
             backgroundColor: specificBgColor(i),
             border: `2px solid ${specificBgColor(i)}`,
           }"
-          :class="{ selected: nextLetter === key && !finish }"
+          :class="{ selected: nextLetter === key && !finish && !countdown }"
         >
           {{ key }}
         </div>
@@ -63,8 +67,9 @@
 
 <script lang="ts">
 /* eslint-disable object-curly-newline */
+/* eslint-disable comma-dangle */
 /* eslint-disable vue/no-side-effects-in-computed-properties */
-import { defineComponent, ref, computed, watch, onMounted } from 'vue';
+import { defineComponent, ref, computed, watch, onMounted, Ref, onUnmounted } from 'vue';
 import { getSentence, specificWidth, specificBgColor, buttons } from './utils';
 
 export default defineComponent({
@@ -77,12 +82,19 @@ export default defineComponent({
     const currentWordIndex = ref(0);
     const nextLetterIndex = ref(0);
     const finish = ref(false);
-    const currentWord = computed(() => sentence.value[currentWordIndex.value]);
+    const countdown: Ref<number | string> = ref(3);
+    const speed = ref('');
+    const currentWord = computed(() => {
+      if (sentence.value[currentWordIndex.value]) {
+        return sentence.value[currentWordIndex.value];
+      }
+      return ' ';
+    });
     const nextLetter = computed(() => {
-      const word = `${currentWord.value} ` || ' ';
+      const word = `${currentWord.value} `;
       let next = word[0];
       let currect = true;
-      for (let i = 0; i < inputValue.value.length - 1; i += 1) {
+      for (let i = 0; i < inputValue.value.length; i += 1) {
         if (inputValue.value[i] !== word[i]) {
           currect = false;
         }
@@ -94,28 +106,60 @@ export default defineComponent({
       }
       return next.toUpperCase();
     });
+    let sec = 0;
+    let id = 0;
+    watch([() => finish.value, () => countdown.value], () => {
+      if (!countdown.value && !finish.value) {
+        if (id) {
+          clearInterval(id);
+        }
+        id = setInterval(() => {
+          sec += 1;
+        }, 1000);
+      }
+    });
     watch(
       () => inputValue.value,
       () => {
+        // change to  next word
         if (inputValue.value === `${currentWord.value} `) {
           currentWordIndex.value += 1;
           inputValue.value = '';
           nextLetterIndex.value = 0;
+          // check if finish
           if (currentWordIndex.value >= sentence.value.length) {
             finish.value = true;
+            clearInterval(id);
+            speed.value = (content.value.Content.replaceAll(' ', '').length / sec).toFixed(2);
+            sec = 0;
           }
         }
-        // eslint-disable-next-line comma-dangle
       }
     );
+
     const restart = async () => {
       content.value = await getSentence();
       inputValue.value = '';
       finish.value = false;
+      currentWordIndex.value = 0;
+      countdown.value = 3;
+      for (let i = 3; i > -1; i -= 1) {
+        setTimeout(() => {
+          countdown.value = i;
+        }, 1000 * (3 - i));
+      }
     };
 
     onMounted(async () => {
       content.value = await getSentence();
+      for (let i = 3; i > -1; i -= 1) {
+        setTimeout(() => {
+          countdown.value = i;
+        }, 1000 * (3 - i));
+      }
+    });
+    onUnmounted(() => {
+      clearInterval(id);
     });
 
     return {
@@ -130,6 +174,8 @@ export default defineComponent({
       nextLetterIndex,
       restart,
       finish,
+      countdown,
+      speed,
     };
   },
 });
@@ -160,7 +206,6 @@ export default defineComponent({
     transform: translate(0);
   }
 }
-
 body {
   background-color: #282828;
   width: 100vw;
@@ -182,25 +227,26 @@ body {
   position: relative;
   border-radius: 10px;
   padding: 50px;
+  font-size: 1.5em;
   &-sentence {
-    font-size: 1.5em;
     flex-wrap: wrap;
   }
   &-sentenceInfo {
     position: absolute;
     top: 18vh;
     right: 20px;
-    font-size: 1.2em;
+    font-size: 0.7em;
     font-family: 'Courgette', cursive;
   }
 }
 .end {
-  font-size: 1.5em;
-  & div:nth-child(2) {
+  & div:nth-child(3) {
     padding: 10px 20px;
     background: #81818130;
     border-radius: 10px;
     transition: 0.1s ease-in-out;
+    cursor: pointer;
+    margin-top: 25px;
     &:hover {
       transform: scale(1.05);
     }
