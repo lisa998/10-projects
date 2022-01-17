@@ -52,7 +52,7 @@ export default defineComponent({
     return {
       id: 2,
       enabled: true,
-      options: ['important', 'normal', 'completed'],
+
       list: [
         {
           name: 'John',

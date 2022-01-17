@@ -55,6 +55,11 @@ export default defineComponent({
     disabled: Boolean,
     dragging: Boolean,
   },
+  data() {
+    return {
+      options: ['important', 'normal', 'completed'],
+    };
+  },
 });
 </script>
 <style scoped lang='scss'>

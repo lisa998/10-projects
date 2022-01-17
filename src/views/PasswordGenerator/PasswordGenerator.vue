@@ -68,6 +68,11 @@ export default defineComponent({
       }
     },
     copy() {
+      if (!navigator.clipboard) {
+        // Clipboard API not available
+        return;
+      }
+
       navigator.clipboard
         .writeText(this.str)
         .then(() => {
