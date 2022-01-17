@@ -220,7 +220,8 @@ export default defineComponent({
     & .nav-hint {
       font-size: 0.5em;
       &-text {
-        width: 100px;
+        width: 120px;
+        flex-wrap: wrap;
       }
     }
   }
