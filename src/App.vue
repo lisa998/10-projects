@@ -10,7 +10,22 @@
       </router-link>
     </div>
   </div>
-  <div @click="handleNav" class="icon"><i class="fas fa-bars"></i></div>
+  <div @click="handleNav" class="icon">
+    <i class="fas fa-bars"></i>
+    <transition>
+      <div class="nav-hint" v-if="hint">
+        <i class="far fa-hand-pointer"></i>
+        <div class="nav-hint-text">
+          <span
+            v-for="(letter, i) in hintString"
+            :key="i"
+            :style="{ animationDelay: `${i * 0.1}s` }"
+            >{{ letter }}</span
+          >
+        </div>
+      </div>
+    </transition>
+  </div>
 </template>
 
 <script lang="ts">
@@ -23,6 +38,8 @@ export default defineComponent({
     return {
       route: routePath,
       nav: false,
+      hint: true,
+      hintString: 'Click to Open Navigation',
     };
   },
   methods: {
@@ -33,6 +50,7 @@ export default defineComponent({
         .reduce((newName, ele) => `${newName} ${ele}`);
     },
     handleNav() {
+      this.hint = false;
       this.nav = !this.nav;
     },
     closeNav() {
@@ -42,10 +60,22 @@ export default defineComponent({
 });
 </script>>
 
-<style lang="scss">
+<style lang="scss" >
+@keyframes upAndDown {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
 * {
   box-sizing: border-box;
 }
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -127,6 +157,47 @@ export default defineComponent({
   padding: 20px;
   top: 0;
   position: fixed;
+  cursor: pointer;
+  & .nav-hint {
+    width: 100px;
+    height: 100px;
+    box-sizing: content-box;
+    border: 100px solid rgba(0, 0, 0, 0.219);
+    border-radius: 50%;
+    position: absolute;
+    top: -105px;
+    left: -105px;
+    & .fa-hand-pointer {
+      color: #000;
+      position: relative;
+      top: 1.2em;
+      left: 0px;
+      font-size: 2em;
+      animation: upAndDown 0.7s infinite ease-in-out;
+    }
+    &-text {
+      width: 300px;
+      position: relative;
+      top: 80px;
+      left: 30px;
+      display: flex;
+      & span {
+        min-width: 5px;
+        animation: upAndDown 3s infinite ease-in-out;
+      }
+    }
+  }
+}
+.v-leave {
+  opacity: 1;
+  transform: scale(1);
+}
+.v-leave-active {
+  transition: 0.5s;
+}
+.v-leave-to {
+  opacity: 0;
+  transform: scale(0);
 }
 .fa-bars {
   cursor: pointer;
@@ -146,6 +217,12 @@ export default defineComponent({
   }
   .icon {
     font-size: 2rem;
+    & .nav-hint {
+      font-size: 0.5em;
+      &-text {
+        width: 100px;
+      }
+    }
   }
   .link {
     padding: 15px;
